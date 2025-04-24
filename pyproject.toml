@@ -17,6 +17,9 @@ passlib = "^1.7.4"
 uvicorn = "^0.34.2"
 python-dotenv = "^1.1.0"
 pydantic-settings = "^2.9.1"
+pyjwt = "^2.10.1"
+python-jose = {extras = ["cryptography"], version = "^3.4.0"}
+bcrypt = "^4.3.0"
 
 
 [build-system]
