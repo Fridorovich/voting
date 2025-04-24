@@ -1,0 +1,32 @@
+from datetime import timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.modules.auth.schemas import UserCreate, UserLogin, Token
+from app.modules.auth.services import create_user, authenticate_user, create_access_token
+from app.database.session import get_db
+from app.database.models import User
+
+router = APIRouter(prefix="/auth", tags=["Auth"])
+
+@router.post("/register", response_model=dict)
+async def register(user_data: UserCreate, db=Depends(get_db)):
+    """Регистрация нового пользователя"""
+    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    await create_user(db, user_data.email, user_data.password)
+    return {"message": "User registered successfully"}
+
+@router.post("/login", response_model=Token)
+async def login(user_data: UserLogin, db=Depends(get_db)):
+    """Логин пользователя"""
+    user = await authenticate_user(db, user_data.email, user_data.password)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    access_token = create_access_token(data={"sub": user.email}, expires_delta=timedelta(minutes=30))
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/logout", response_model=dict)
+async def logout():
+    """Выход из аккаунта (необходимо очистить токен на клиенте)"""
+    return {"message": "Logout successful"}
