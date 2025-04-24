@@ -1,0 +1,46 @@
+# Стандартные исключения для Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Виртуальное окружение
+venv/
+ENV/
+env/
+VirtualEnv/
+
+# Файлы Poetry
+.pypoetry/
+-poetry.lock
+poetry.lock
+
+# Файлы зависимостей
+requirements.txt
+
+# Данные базы данных
+sqr_voting.db  # Если используете SQLite
+*.sqlite3
+
+# Файлы Alembic миграций
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
+
+# Логи и временные файлы
+logs/
+*.log
+*.tmp
+*.swp
+
+# Файлы IDE
+.vscode/
+.idea/
+.vs/
+*.sublime-project
+*.sublime-workspace
+
+# Файлы операционной системы
+.DS_Store
+Thumbs.db
+
+# Файлы конфиденциальной информации
+.env

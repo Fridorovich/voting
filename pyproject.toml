@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "sqr-voting-system"
+version = "0.1.0"
+description = "A voting system for creating surveys and votes"
+authors = ["Egor Nischikh <e.nischikh@innopolis.university>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.12"
+sqlalchemy = "^2.0.40"
+alembic = "^1.15.2"
+pydantic = "^2.11.3"
+passlib = "^1.7.4"
+uvicorn = "^0.34.2"
+python-dotenv = "^1.1.0"
+pydantic-settings = "^2.9.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
