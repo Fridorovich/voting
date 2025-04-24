@@ -28,6 +28,9 @@ async def create_poll(db: Session, poll_data: PollCreate):
     db.commit()
     db.refresh(new_poll)
 
+    if not new_poll.id:
+        raise ValueError("Failed to create poll: poll ID is missing")
+
     for choice_text in poll_data.choices:
         new_choice = Choice(text=choice_text, poll_id=new_poll.id)
         db.add(new_choice)
@@ -70,3 +73,29 @@ async def check_and_close_polls(db: Session):
 
     return {"message": f"{len(polls_to_close)} polls have been closed."}
 
+
+async def delete_poll(db: Session, poll_id: int):
+    """Удаление опроса по ID"""
+    poll = db.query(Poll).filter(Poll.id == poll_id).first()
+    if not poll:
+        raise ValueError("Poll not found")
+
+    db.delete(poll)
+    db.commit()
+    return {"message": "Poll deleted successfully"}
+
+
+async def delete_user(db: Session, user_id: int):
+    """Удаление пользователя по ID"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise ValueError("User not found")
+
+    db.delete(user)
+    db.commit()
+    return {"message": "User deleted successfully"}
+
+async def get_all_choices(db: Session):
+    """Получение списка всех вариантов ответов (choices)"""
+    choices = db.query(Choice).all()
+    return [{"id": choice.id, "text": choice.text, "poll_id": choice.poll_id} for choice in choices]

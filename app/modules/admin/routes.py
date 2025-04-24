@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.database.session import get_db
 from app.modules.admin.schemas import UserCreate, PollCreate, PollUpdate
-from app.modules.admin.services import create_user, create_poll, update_poll, check_and_close_polls
+from app.modules.admin.services import create_user, create_poll, update_poll, check_and_close_polls, delete_poll, \
+    delete_user, get_all_choices
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -28,3 +29,24 @@ async def admin_update_poll(poll_id: int, poll_update_data: PollUpdate, db=Depen
 async def admin_check_and_close_polls(db=Depends(get_db)):
     """Администратор может вызвать эту функцию для закрытия просроченных опросов"""
     return await check_and_close_polls(db)
+
+@router.delete("/polls/{poll_id}", response_model=dict)
+async def admin_delete_poll(poll_id: int, db=Depends(get_db)):
+    """Администратор удаляет опрос по ID"""
+    try:
+        return await delete_poll(db, poll_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Poll not found")
+
+@router.delete("/users/{user_id}", response_model=dict)
+async def admin_delete_user(user_id: int, db=Depends(get_db)):
+    """Администратор удаляет пользователя по ID"""
+    try:
+        return await delete_user(db, user_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="User not found")
+
+@router.get("/choices", response_model=list[dict])
+async def get_all_choices_route(db=Depends(get_db)):
+    """Получение списка всех вариантов ответов"""
+    return await get_all_choices(db)
