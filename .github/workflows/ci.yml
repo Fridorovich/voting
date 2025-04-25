@@ -28,10 +28,11 @@ jobs:
       run: |
         poetry install --no-interaction --no-ansi
 
-    - name: Run flake8
-      run: |
-        poetry run flake8 app/modules/voting/ --count --show-source --statistics
 
     - name: Run tests
       run: |
         poetry run pytest app/modules/voting/tests/ -v
+
+    - name: Run flake8
+      run: |
+        poetry run flake8 app/modules/voting/ --count --show-source --statistics
