@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.modules.auth.schemas import UserCreate, UserLogin, Token
-from app.modules.auth.services import create_user, authenticate_user, create_access_token
+from app.modules.auth.services import create_user, authenticate_user, create_access_token, create_refresh_token, decode_access_token
 from app.database.session import get_db
 from app.database.models import User
 
@@ -34,7 +34,6 @@ async def login(user_data: UserLogin, db=Depends(get_db)):
 @router.post("/logout", response_model=dict)
 async def logout():
     """Выход из аккаунта (необходимо очистить токен на клиенте)"""
-    # Логаут не требует серверных изменений, достаточно уведомить клиента
     return {"message": "Logout successful"}
 
 
@@ -45,7 +44,11 @@ async def refresh_token(refresh_token: str):
     if not payload or "sub" not in payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
-    # Создание нового access token
     new_access_token = create_access_token(data={"sub": payload["sub"]}, expires_delta=timedelta(minutes=30))
+    new_refresh_token = create_refresh_token(data={"sub": payload["sub"]}, expires_delta=timedelta(days=7))
 
-    return {"access_token": new_access_token, "token_type": "bearer"}
+    return {
+        "access_token": new_access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer"
+    }
