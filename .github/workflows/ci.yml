@@ -31,7 +31,7 @@ jobs:
 
     - name: Run tests
       run: |
-        poetry run pytest app/modules/voting/tests/ -v
+        poetry run pytest app/tests -v
 
     - name: Run flake8
       run: |
