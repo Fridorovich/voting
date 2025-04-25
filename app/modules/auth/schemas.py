@@ -13,4 +13,5 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     """Схема для ответа с токеном"""
     access_token: str
+    refresh_token: str
     token_type: str
