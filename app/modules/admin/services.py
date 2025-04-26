@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from app.database.models import User, Poll, Choice
 from app.modules.admin.schemas import UserCreate, PollCreate, PollUpdate
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
+
 
 async def create_user(db: Session, user_data: UserCreate):
     """Создание нового пользователя"""
@@ -59,7 +60,7 @@ async def update_poll(db: Session, poll_id: int, poll_update_data: PollUpdate):
 
 async def check_and_close_polls(db: Session):
     """Проверяет все опросы и закрывает те, чья дата закрытия уже наступила"""
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
     polls_to_close = db.query(Poll).filter(
         Poll.close_date.isnot(None),
         Poll.close_date <= current_time,

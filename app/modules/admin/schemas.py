@@ -26,3 +26,7 @@ class PollUpdate(BaseModel):
     description: str = None
     is_closed: bool = None
     close_date: str = None
+
+class TokenParam(BaseModel):
+    """Схема для параметра токена"""
+    token: str
