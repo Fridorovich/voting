@@ -6,6 +6,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
+
 class PollCreate(BaseModel):
     title: str
     description: str = None
@@ -17,15 +18,18 @@ class PollCreate(BaseModel):
     def parse_close_date(cls, value):
         if isinstance(value, str):
             try:
-                return datetime.fromisoformat(value.replace("Z", "+00:00"))  # Поддержка ISO 8601
+                return datetime.fromisoformat(value.replace("Z", "+00:00"))
             except ValueError:
                 raise ValueError("Invalid datetime format")
         return value
+
+
 class PollUpdate(BaseModel):
     title: str = None
     description: str = None
     is_closed: bool = None
     close_date: str = None
+
 
 class TokenParam(BaseModel):
     """Схема для параметра токена"""

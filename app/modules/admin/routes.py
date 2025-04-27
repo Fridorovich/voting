@@ -14,32 +14,35 @@ from app.shared.security import get_current_admin  # Защита админск
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
+
 @router.post("/users")
 async def admin_create_user(
-    user_data: UserCreate,
-    db=Depends(get_db),
-    admin=Depends(get_current_admin)
+        user_data: UserCreate,
+        db=Depends(get_db),
+        admin=Depends(get_current_admin)
 ):
     """Администратор создает нового пользователя"""
     return await create_user(db, user_data.email, user_data.password, role="user")
 
+
 @router.post("/polls")
 async def admin_create_poll(
-    poll_data: PollCreate,
-    token_param: TokenParam = Depends(),  # Токен как параметр запроса
-    db=Depends(get_db),
-    admin=Depends(get_current_admin)
+        poll_data: PollCreate,
+        token_param: TokenParam = Depends(),
+        db=Depends(get_db),
+        admin=Depends(get_current_admin)
 ):
     """Администратор создает новый опрос"""
     return await create_poll(db, poll_data)
 
+
 @router.put("/polls/{poll_id}")
 async def admin_update_poll(
-    poll_id: int,
-    poll_update_data: PollUpdate,
-    token_param: TokenParam = Depends(),  # Токен как параметр запроса
-    db=Depends(get_db),
-    admin=Depends(get_current_admin)
+        poll_id: int,
+        poll_update_data: PollUpdate,
+        token_param: TokenParam = Depends(),
+        db=Depends(get_db),
+        admin=Depends(get_current_admin)
 ):
     """Администратор обновляет существующий опрос"""
     try:
@@ -48,21 +51,23 @@ async def admin_update_poll(
     except ValueError:
         raise HTTPException(status_code=404, detail="Poll not found")
 
+
 @router.post("/polls/check-and-close")
 async def admin_check_and_close_polls(
-    token_param: TokenParam = Depends(),  # Токен как параметр запроса
-    db=Depends(get_db),
-    admin=Depends(get_current_admin)
+        token_param: TokenParam = Depends(),
+        db=Depends(get_db),
+        admin=Depends(get_current_admin)
 ):
     """Администратор может вызвать эту функцию для закрытия просроченных опросов"""
     return await check_and_close_polls(db)
 
+
 @router.delete("/polls/{poll_id}")
 async def admin_delete_poll(
-    poll_id: int,
-    token_param: TokenParam = Depends(),  # Токен как параметр запроса
-    db=Depends(get_db),
-    admin=Depends(get_current_admin)
+        poll_id: int,
+        token_param: TokenParam = Depends(),
+        db=Depends(get_db),
+        admin=Depends(get_current_admin)
 ):
     """Администратор удаляет опрос по ID"""
     try:
@@ -70,12 +75,13 @@ async def admin_delete_poll(
     except ValueError:
         raise HTTPException(status_code=404, detail="Poll not found")
 
+
 @router.delete("/users/{user_id}")
 async def admin_delete_user(
-    user_id: int,
-    token_param: TokenParam = Depends(),  # Токен как параметр запроса
-    db=Depends(get_db),
-    admin=Depends(get_current_admin)
+        user_id: int,
+        token_param: TokenParam = Depends(),
+        db=Depends(get_db),
+        admin=Depends(get_current_admin)
 ):
     """Администратор удаляет пользователя по ID"""
     try:
@@ -83,11 +89,12 @@ async def admin_delete_user(
     except ValueError:
         raise HTTPException(status_code=404, detail="User not found")
 
+
 @router.get("/choices")
 async def get_all_choices_route(
-    token_param: TokenParam = Depends(),  # Токен как параметр запроса
-    db=Depends(get_db),
-    admin=Depends(get_current_admin)
+        token_param: TokenParam = Depends(),
+        db=Depends(get_db),
+        admin=Depends(get_current_admin)
 ):
     """Получение списка всех вариантов ответов"""
     return await get_all_choices(db)

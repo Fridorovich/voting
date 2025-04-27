@@ -6,12 +6,13 @@ from datetime import datetime, timezone, UTC
 
 async def create_user(db: Session, user_data: UserCreate):
     """Создание нового пользователя"""
-    hashed_password = "hashed_" + user_data.password  # типо хешируем
+    hashed_password = "hashed_" + user_data.password
     new_user = User(email=user_data.email, hashed_password=hashed_password, is_active=True)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
+
 
 async def create_poll(db: Session, poll_data: PollCreate):
     """Создание нового опроса с датой закрытия"""
@@ -39,6 +40,7 @@ async def create_poll(db: Session, poll_data: PollCreate):
 
     return {"id": new_poll.id, "title": new_poll.title, "choices": poll_data.choices}
 
+
 async def update_poll(db: Session, poll_id: int, poll_update_data: PollUpdate):
     """Обновление существующего опроса"""
     poll = db.query(Poll).filter(Poll.id == poll_id).first()
@@ -57,6 +59,7 @@ async def update_poll(db: Session, poll_id: int, poll_update_data: PollUpdate):
     db.commit()
     db.refresh(poll)
     return poll
+
 
 async def check_and_close_polls(db: Session):
     """Проверяет все опросы и закрывает те, чья дата закрытия уже наступила"""
@@ -95,6 +98,7 @@ async def delete_user(db: Session, user_id: int):
     db.delete(user)
     db.commit()
     return {"message": "User deleted successfully"}
+
 
 async def get_all_choices(db: Session):
     """Получение списка всех вариантов ответов (choices)"""
