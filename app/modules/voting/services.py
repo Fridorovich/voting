@@ -1,18 +1,18 @@
+import logging
 from datetime import timezone, datetime
-
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.database.models import Poll, Choice, Vote, User
 from collections import Counter
-
 from app.modules.voting.schemas import PollCreate
 
+logger = logging.getLogger(__name__)
 
 async def get_active_polls(db: Session):
-    """Получение списка всех активных опросов с результатами"""
+    logger.info("Fetching active polls")
     all_polls = db.query(Poll).all()
-
     result = []
+
     for poll in all_polls:
         poll_data = {
             "id": poll.id,
@@ -24,30 +24,19 @@ async def get_active_polls(db: Session):
         }
 
         if poll.is_closed:
-            votes = db.query(Vote.choice_id).filter(
-                Vote.choice_id.in_([c.id for c in poll.choices])
-            ).all()
-
+            votes = db.query(Vote.choice_id).filter(Vote.choice_id.in_([c.id for c in poll.choices])).all()
             vote_counts = Counter(vote.choice_id for vote in votes)
-
-            poll_data["results"] = {
-                choice.text: vote_counts.get(choice.id, 0)
-                for choice in poll.choices
-            }
-
+            poll_data["results"] = {choice.text: vote_counts.get(choice.id, 0) for choice in poll.choices}
         else:
-            poll_data["results"] = {
-                choice.text: 0
-                for choice in poll.choices
-            }
+            poll_data["results"] = {choice.text: 0 for choice in poll.choices}
 
         result.append(poll_data)
 
+    logger.info(f"Fetched {len(result)} polls")
     return result
 
-
 async def create_poll(db: Session, poll_data: PollCreate):
-    """Создание нового опроса с датой закрытия"""
+    logger.info(f"Creating new poll: {poll_data.title}")
     new_poll = Poll(
         title=poll_data.title,
         description=poll_data.description,
@@ -63,24 +52,26 @@ async def create_poll(db: Session, poll_data: PollCreate):
     db.refresh(new_poll)
 
     if not new_poll.id:
+        logger.error("Poll creation failed: missing ID")
         raise ValueError("Failed to create poll: poll ID is missing")
 
     for choice_text in poll_data.choices:
         new_choice = Choice(text=choice_text, poll_id=new_poll.id)
         db.add(new_choice)
-    db.commit()
 
+    db.commit()
+    logger.info(f"Poll created successfully: id={new_poll.id}")
     return {"id": new_poll.id, "title": new_poll.title, "choices": poll_data.choices}
 
-
 async def vote_in_poll(db: Session, poll_id: int, choice_ids: list[int], user_email: str):
-    """Голосование пользователя в опросе"""
-    # Находим опрос
+    logger.info(f"User voting: email={user_email}, poll_id={poll_id}, choices={choice_ids}")
     poll = db.query(Poll).filter(Poll.id == poll_id).first()
     if not poll:
+        logger.error(f"Poll not found: poll_id={poll_id}")
         raise HTTPException(status_code=404, detail="Poll not found")
 
     if poll.is_closed:
+        logger.warning(f"Vote rejected: poll closed poll_id={poll_id}")
         raise HTTPException(status_code=400, detail="Poll is closed")
 
     close_date = poll.close_date
@@ -88,49 +79,49 @@ async def vote_in_poll(db: Session, poll_id: int, choice_ids: list[int], user_em
         close_date = close_date.replace(tzinfo=timezone.utc)
 
     if close_date and close_date <= datetime.now(timezone.utc):
+        logger.warning(f"Vote rejected: poll expired poll_id={poll_id}")
         raise HTTPException(status_code=400, detail="Poll has expired")
 
     choices = db.query(Choice).filter(Choice.id.in_(choice_ids), Choice.poll_id == poll_id).all()
     if len(choices) != len(choice_ids):
+        logger.warning(f"Invalid choices for poll_id={poll_id}: received={choice_ids}")
         raise HTTPException(status_code=400, detail="Invalid choice IDs")
 
     if not poll.is_multiple_choice and len(choice_ids) > 1:
+        logger.warning(f"Invalid multiple choice attempt poll_id={poll_id}")
         raise HTTPException(status_code=400, detail="Single-choice poll cannot have multiple selections")
 
     user = db.query(User).filter(User.email == user_email).first()
     if not user:
+        logger.error(f"User not found: email={user_email}")
         raise HTTPException(status_code=404, detail="User not found")
 
-    existing_votes = (
-        db.query(Vote)
-        .filter(
-            Vote.user_id == user.id,
-            Vote.choice_id.in_([c.id for c in poll.choices])
-        )
-        .all()
-    )
+    existing_votes = db.query(Vote).filter(
+        Vote.user_id == user.id,
+        Vote.choice_id.in_([c.id for c in poll.choices])
+    ).all()
 
     if existing_votes:
+        logger.info(f"Removing existing votes for user_id={user.id}")
         for vote in existing_votes:
             db.delete(vote)
 
-    new_votes = [
-        Vote(user_id=user.id, choice_id=choice_id)
-        for choice_id in choice_ids
-    ]
+    new_votes = [Vote(user_id=user.id, choice_id=choice_id) for choice_id in choice_ids]
     db.add_all(new_votes)
     db.commit()
 
+    logger.info(f"Vote submitted successfully: user_id={user.id}")
     return {"message": "Vote processed successfully"}
 
-
 async def get_poll_details(db: Session, poll_id: int):
-    """Получение деталей опроса и его вариантов ответов"""
+    logger.info(f"Fetching poll details: poll_id={poll_id}")
     poll = db.query(Poll).filter(Poll.id == poll_id).first()
     if not poll:
+        logger.warning(f"Poll not found: poll_id={poll_id}")
         return None
 
     choices = db.query(Choice).filter(Choice.poll_id == poll_id).all()
+    logger.info(f"Poll details fetched successfully: poll_id={poll_id}")
     return {
         "id": poll.id,
         "title": poll.title,
@@ -141,27 +132,31 @@ async def get_poll_details(db: Session, poll_id: int):
         "choices": [{"id": choice.id, "text": choice.text} for choice in choices]
     }
 
-
 async def close_poll(db: Session, poll_id: int, user_email: str, new_close_date: str = None):
-    """Закрытие опроса создателем"""
+    logger.info(f"Closing poll: poll_id={poll_id} by user_email={user_email}")
     poll = db.query(Poll).filter(Poll.id == poll_id).first()
     if not poll:
+        logger.error(f"Poll not found: poll_id={poll_id}")
         raise HTTPException(status_code=404, detail="Poll not found")
 
     if poll.is_closed:
+        logger.warning(f"Poll already closed: poll_id={poll_id}")
         raise HTTPException(status_code=400, detail="Poll already closed")
 
     if poll.creator.email != user_email:
+        logger.warning(f"Unauthorized poll close attempt: poll_id={poll_id}")
         raise HTTPException(status_code=403, detail="Only the creator of the poll can close it")
 
     if new_close_date:
         try:
             poll.close_date = datetime.fromisoformat(new_close_date.replace("Z", "+00:00"))
         except ValueError:
+            logger.error(f"Invalid close date format: {new_close_date}")
             raise HTTPException(status_code=400, detail="Invalid close date format")
 
     poll.is_closed = True
     db.commit()
     db.refresh(poll)
 
+    logger.info(f"Poll closed successfully: poll_id={poll_id}")
     return {"message": "Poll closed successfully"}

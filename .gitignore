@@ -8,6 +8,7 @@ venv/
 ENV/
 env/
 VirtualEnv/
+myenv/
 
 # Файлы Poetry
 .pypoetry/
