@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from app.database.models import Poll, Choice, Vote, User
 from collections import Counter
 from app.modules.voting.schemas import PollCreate
-
+from datetime import datetime, timezone
+UTC = timezone.utc
 logger = logging.getLogger(__name__)
 
 async def get_active_polls(db: Session):
