@@ -1,4 +1,4 @@
-# SQR Voting System
+cd # SQR Voting System
 
 ## Требования
 - Python 3.11+
