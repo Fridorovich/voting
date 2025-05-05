@@ -2,9 +2,9 @@ from pydantic import BaseModel, validator
 from datetime import datetime
 
 
-class UserCreate(BaseModel):
-    email: str
-    password: str
+class VoteCreate(BaseModel):
+    """Схема для голосования"""
+    choice_ids: list[int]
 
 
 class PollCreate(BaseModel):
@@ -24,13 +24,11 @@ class PollCreate(BaseModel):
         return value
 
 
-class PollUpdate(BaseModel):
-    title: str = None
-    description: str = None
-    is_closed: bool = None
-    close_date: str = None
-
-
 class TokenParam(BaseModel):
     """Схема для параметра токена"""
     token: str
+
+
+class ClosePollRequest(BaseModel):
+    """Схема для закрытия опроса"""
+    new_close_date: str = None

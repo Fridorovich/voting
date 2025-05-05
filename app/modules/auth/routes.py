@@ -26,8 +26,23 @@ async def login(user_data: UserLogin, db=Depends(get_db)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    access_token = create_access_token(data={"sub": user.email}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    refresh_token = create_refresh_token(data={"sub": user.email}, expires_delta=timedelta(days=7))
+    access_token_data = {
+        "sub": user.email,
+        "role": user.role
+    }
+    refresh_token_data = {
+        "sub": user.email,
+        "role": user.role
+    }
+
+    access_token = create_access_token(
+        data=access_token_data,
+        expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    refresh_token = create_refresh_token(
+        data=refresh_token_data,
+        expires_delta=timedelta(days=7)
+    )
 
     return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
 
@@ -45,8 +60,8 @@ async def refresh_token(refresh_token: str):
     if not payload or "sub" not in payload:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
-    new_access_token = create_access_token(data={"sub": payload["sub"]}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
-    new_refresh_token = create_refresh_token(data={"sub": payload["sub"]}, expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
+    new_access_token = create_access_token(data={"sub": payload["sub"], "role": payload["role"]}, expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    new_refresh_token = create_refresh_token(data={"sub": payload["sub"], "role": payload["role"]}, expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS))
 
     return {
         "access_token": new_access_token,

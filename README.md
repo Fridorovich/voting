@@ -1,4 +1,4 @@
-# SQR Voting System
+cd # SQR Voting System
 
 ## Требования
 - Python 3.11+
@@ -20,6 +20,7 @@
     SECRET_KEY=your-secret-key
     ALGORITHM=HS256
     ACCESS_TOKEN_EXPIRE_MINUTES=30
+    REFRESH_TOKEN_EXPIRE_DAYS=7
     ```
 4. Примените миграции:
    ```bash
