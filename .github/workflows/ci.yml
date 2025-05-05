@@ -1,4 +1,5 @@
 name: CI Pipeline
+
 on:
   push:
     branches: [ main ]
@@ -8,7 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
     - uses: actions/checkout@v4
