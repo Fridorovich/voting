@@ -18,7 +18,6 @@ from app.modules.admin.services import (
     get_all_choices,
 )
 
-# Fixtures for test data
 @pytest.fixture
 def mock_db():
     return MagicMock(spec=Session)
@@ -46,10 +45,8 @@ def poll_update_data():
         close_date=(datetime.now(timezone.utc) + timedelta(days=2)).strftime("%Y-%m-%d %H:%M:%S")
     )
 
-# Test cases
 @pytest.mark.asyncio
 async def test_create_user_success(mock_db, user_data):
-    # Setup
     mock_user = User(
         id=1,
         email=user_data.email,
@@ -60,10 +57,8 @@ async def test_create_user_success(mock_db, user_data):
     mock_db.commit.return_value = None
     mock_db.refresh.return_value = None
     
-    # Test
     result = await create_user(mock_db, user_data)
     
-    # Assertions
     assert result.email == user_data.email
     assert "hashed_" in result.hashed_password
     mock_db.add.assert_called_once()
@@ -73,7 +68,7 @@ async def test_create_user_success(mock_db, user_data):
 @pytest.mark.asyncio
 async def test_create_poll_success(mock_db, poll_data):
     mock_poll = MagicMock(spec=Poll)
-    mock_poll.id = 1  # Explicitly set the ID
+    mock_poll.id = 1
     mock_poll.title = poll_data.title
     mock_poll = Poll(
         id=1,
@@ -101,7 +96,6 @@ async def test_create_poll_success(mock_db, poll_data):
 
 @pytest.mark.asyncio
 async def test_create_poll_failure(mock_db, poll_data):
-    # Setup
     mock_poll = Poll(
         title=poll_data.title,
         description=poll_data.description,
@@ -114,13 +108,11 @@ async def test_create_poll_failure(mock_db, poll_data):
     mock_db.commit.return_value = None
     mock_db.refresh.return_value = None
     
-    # Test and Assertions
     with pytest.raises(ValueError, match="Failed to create poll: poll ID is missing"):
         await create_poll(mock_db, poll_data)
 
 @pytest.mark.asyncio
 async def test_update_poll_success(mock_db, poll_update_data):
-    # Setup
     existing_poll = Poll(
         id=1,
         title="Original Title",
@@ -130,10 +122,8 @@ async def test_update_poll_success(mock_db, poll_update_data):
     )
     mock_db.query.return_value.filter.return_value.first.return_value = existing_poll
     
-    # Test
     result = await update_poll(mock_db, 1, poll_update_data)
     
-    # Assertions
     assert result.title == poll_update_data.title
     assert result.description == poll_update_data.description
     assert result.is_closed == poll_update_data.is_closed
@@ -142,16 +132,13 @@ async def test_update_poll_success(mock_db, poll_update_data):
 
 @pytest.mark.asyncio
 async def test_update_poll_not_found(mock_db, poll_update_data):
-    # Setup
     mock_db.query.return_value.filter.return_value.first.return_value = None
     
-    # Test and Assertions
     with pytest.raises(ValueError, match="Poll not found"):
         await update_poll(mock_db, 999, poll_update_data)
 
 @pytest.mark.asyncio
 async def test_check_and_close_polls(mock_db):
-    # Setup
     now = datetime.now(timezone.utc)
     open_poll = Poll(id=1, close_date=now - timedelta(hours=1), is_closed=False)
     closed_poll = Poll(id=2, close_date=now - timedelta(days=1), is_closed=True)
@@ -159,62 +146,49 @@ async def test_check_and_close_polls(mock_db):
     
     mock_db.query.return_value.filter.return_value.all.return_value = [open_poll]
     
-    # Test
     result = await check_and_close_polls(mock_db)
     
-    # Assertions
     assert result["message"] == "1 polls have been closed."
     assert open_poll.is_closed is True
     mock_db.commit.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_delete_poll_success(mock_db):
-    # Setup
     existing_poll = Poll(id=1, title="Test Poll")
     mock_db.query.return_value.filter.return_value.first.return_value = existing_poll
     
-    # Test
     result = await delete_poll(mock_db, 1)
     
-    # Assertions
     assert result["message"] == "Poll deleted successfully"
     mock_db.delete.assert_called_once_with(existing_poll)
     mock_db.commit.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_delete_poll_not_found(mock_db):
-    # Setup
     mock_db.query.return_value.filter.return_value.first.return_value = None
     
-    # Test and Assertions
     with pytest.raises(ValueError, match="Poll not found"):
         await delete_poll(mock_db, 999)
 
 @pytest.mark.asyncio
 async def test_delete_user_success(mock_db):
-    # Setup
     existing_user = User(id=1, email="test@example.com")
     mock_db.query.return_value.filter.return_value.first.return_value = existing_user
     
-    # Test
     result = await delete_user(mock_db, 1)
     
-    # Assertions
     assert result["message"] == "User deleted successfully"
     mock_db.delete.assert_called_once_with(existing_user)
     mock_db.commit.assert_called_once()
 
 @pytest.mark.asyncio
 async def test_get_all_choices(mock_db):
-    # Setup
     choice1 = Choice(id=1, text="Choice 1", poll_id=1)
     choice2 = Choice(id=2, text="Choice 2", poll_id=1)
     mock_db.query.return_value.all.return_value = [choice1, choice2]
     
-    # Test
     result = await get_all_choices(mock_db)
     
-    # Assertions
     assert len(result) == 2
     assert result[0]["text"] == "Choice 1"
     assert result[1]["text"] == "Choice 2"
