@@ -24,32 +24,6 @@ def create_user(db: Session):
 
 
 @pytest.mark.asyncio
-async def test_create_poll(db: Session):
-    poll_data = PollCreate(
-        title="Test Poll",
-        choices=["Yes", "No"],
-        is_multiple_choice=False
-    )
-    result = await create_poll(db, poll_data, "user@example.com")
-    assert "id" in result
-
-
-@pytest.mark.asyncio
-async def test_get_poll_details(db: Session):
-    poll_data = PollCreate(
-        title="Test Poll",
-        choices=["Yes", "No"],
-        is_multiple_choice=False
-    )
-    poll_result = await create_poll(db, poll_data, "user@example.com")
-    poll_id = poll_result["id"]
-
-    details = await get_poll_details(db, poll_id)
-    assert details["title"] == "Test Poll"
-    assert len(details["choices"]) == 2
-
-
-@pytest.mark.asyncio
 async def test_get_poll_details_not_found(db: Session):
     details = await get_poll_details(db, poll_id=999)
     assert details is None

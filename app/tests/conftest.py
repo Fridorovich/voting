@@ -12,7 +12,10 @@ SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///./test.db"
 
 @pytest.fixture(scope="module")
 def engine():
-    return create_engine(SQLALCHEMY_TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+    return create_engine(
+        SQLALCHEMY_TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
 
 
 @pytest.fixture(scope="module")

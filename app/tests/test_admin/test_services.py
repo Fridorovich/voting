@@ -45,21 +45,13 @@ def poll_update_data():
         title="Updated Poll",
         description="Updated Description",
         is_closed=True,
-        close_date=(
-                datetime.now(timezone.utc) +
-                timedelta(days=2)
-        ).strftime("%Y-%m-%d %H:%M:%S")
+        close_date=(datetime.now(timezone.utc) + timedelta(days=2))
+        .strftime("%Y-%m-%d %H:%M:%S")
     )
 
 
 @pytest.mark.asyncio
 async def test_create_user_success(mock_db, user_data):
-    mock_user = User(
-        id=1,
-        email=user_data.email,
-        hashed_password="hashed_password123",
-        is_active=True
-    )
     mock_db.add.return_value = None
     mock_db.commit.return_value = None
     mock_db.refresh.return_value = None
@@ -106,14 +98,6 @@ async def test_create_poll_success(mock_db, poll_data):
 
 @pytest.mark.asyncio
 async def test_create_poll_failure(mock_db, poll_data):
-    mock_poll = Poll(
-        title=poll_data.title,
-        description=poll_data.description,
-        creator_id=1,
-        is_multiple_choice=poll_data.is_multiple_choice,
-        close_date=poll_data.close_date,
-        is_closed=False
-    )
     mock_db.add.return_value = None
     mock_db.commit.return_value = None
     mock_db.refresh.return_value = None
