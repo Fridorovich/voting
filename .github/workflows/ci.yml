@@ -18,20 +18,24 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Clean Poetry cache
+    - name: Clean Poetry environments
       run: |
+        # Remove all possible Poetry-related files
+        rm -rf ~/.poetry || true
         rm -rf ~/.cache/pypoetry || true
         rm -rf ~/.local/share/pypoetry || true
-        rm -rf ~/.poetry || true
+        rm -rf ~/.config/pypoetry || true
+        rm -rf .venv || true
 
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.5.1
+    - name: Install Poetry (alternative method)
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Configure Poetry
       run: |
         poetry config virtualenvs.in-project true
+        poetry config virtualenvs.create true --local
 
     - name: Install dependencies
       run: |
