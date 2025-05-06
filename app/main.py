@@ -13,9 +13,11 @@ app.include_router(auth_router)
 app.include_router(voting_router)
 app.include_router(admin_router)
 
+
 @app.get("/")
 def read_root():
     return {"message": "Hello, SQR Voting System!"}
+
 
 @app.middleware("http")
 async def skip_auth_for_docs(request: Request, call_next):
@@ -24,7 +26,9 @@ async def skip_auth_for_docs(request: Request, call_next):
     response = await call_next(request)
     return response
 
+
 logger = logging.getLogger(__name__)
+
 
 @app.get("/test_log")
 def test_log():

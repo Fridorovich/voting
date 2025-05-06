@@ -1,7 +1,15 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Boolean,
+    DateTime,
+    ForeignKey
+)
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database.base import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -11,6 +19,7 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     role = Column(String, default="user")
     polls = relationship("Poll", back_populates="creator")
+
 
 class Poll(Base):
     __tablename__ = "polls"
@@ -25,6 +34,7 @@ class Poll(Base):
     is_multiple_choice = Column(Boolean, default=False)
     choices = relationship("Choice", back_populates="poll")
 
+
 class Choice(Base):
     __tablename__ = "choices"
     id = Column(Integer, primary_key=True, index=True)
@@ -32,6 +42,7 @@ class Choice(Base):
     poll_id = Column(Integer, ForeignKey("polls.id"), nullable=False)
     poll = relationship("Poll", back_populates="choices")
     votes = relationship("Vote", back_populates="choice")
+
 
 class Vote(Base):
     __tablename__ = "votes"

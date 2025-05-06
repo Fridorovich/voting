@@ -3,11 +3,13 @@ from datetime import datetime
 
 
 class UserCreate(BaseModel):
+    """Схема для создания пользователя"""
     email: str
     password: str
 
 
 class PollCreate(BaseModel):
+    """Схема для создания опроса"""
     title: str
     description: str = None
     choices: list[str]
@@ -25,6 +27,7 @@ class PollCreate(BaseModel):
 
 
 class PollUpdate(BaseModel):
+    """Схема для обновления опроса"""
     title: str = None
     description: str = None
     is_closed: bool = None

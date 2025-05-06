@@ -1,22 +1,29 @@
 from sqlalchemy.orm import Session
 from app.database.models import User, Poll, Choice
 from app.modules.admin.schemas import UserCreate, PollCreate, PollUpdate
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 import logging
 from app.shared.logging import setup_logging
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
+
 async def create_user(db: Session, user_data: UserCreate):
     logger.info(f"Creating admin user: email={user_data.email}")
-    hashed_password = "hashed_" + user_data.password
-    new_user = User(email=user_data.email, hashed_password=hashed_password, is_active=True)
+    hashed_password = (
+        "hashed_" + user_data.password
+    )
+    new_user = User(email=user_data.email,
+                    hashed_password=hashed_password,
+                    is_active=True
+                    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     logger.info(f"Admin user created: id={new_user.id}")
     return new_user
+
 
 async def create_poll(db: Session, poll_data: PollCreate):
     logger.info(f"Creating admin poll: title={poll_data.title}")
@@ -46,6 +53,7 @@ async def create_poll(db: Session, poll_data: PollCreate):
     logger.info(f"Admin poll created successfully: id={new_poll.id}")
     return {"id": new_poll.id, "title": new_poll.title, "choices": poll_data.choices}
 
+
 async def update_poll(db: Session, poll_id: int, poll_update_data: PollUpdate):
     logger.info(f"Updating poll: poll_id={poll_id}")
     poll = db.query(Poll).filter(Poll.id == poll_id).first()
@@ -60,12 +68,16 @@ async def update_poll(db: Session, poll_id: int, poll_update_data: PollUpdate):
     if poll_update_data.is_closed is not None:
         poll.is_closed = poll_update_data.is_closed
     if poll_update_data.close_date:
-        poll.close_date = datetime.strptime(poll_update_data.close_date, "%Y-%m-%d %H:%M:%S")
+        poll.close_date = datetime.strptime(
+            poll_update_data.close_date,
+            "%Y-%m-%d %H:%M:%S"
+        )
 
     db.commit()
     db.refresh(poll)
     logger.info(f"Poll updated successfully: poll_id={poll_id}")
     return poll
+
 
 async def check_and_close_polls(db: Session):
     """Проверяет все опросы и закрывает те, чья дата закрытия уже наступила"""
@@ -73,7 +85,7 @@ async def check_and_close_polls(db: Session):
     polls_to_close = db.query(Poll).filter(
         Poll.close_date.isnot(None),
         Poll.close_date <= current_time,
-        Poll.is_closed == False
+        Poll.is_closed.is_(False)
     ).all()
 
     for poll in polls_to_close:
@@ -113,4 +125,11 @@ async def delete_user(db: Session, user_id: int):
 async def get_all_choices(db: Session):
     """Получение списка всех вариантов ответов (choices)"""
     choices = db.query(Choice).all()
-    return [{"id": choice.id, "text": choice.text, "poll_id": choice.poll_id} for choice in choices]
+    return [
+        {
+            "id": choice.id,
+            "text": choice.text,
+            "poll_id": choice.poll_id
+        }
+        for choice in choices
+    ]

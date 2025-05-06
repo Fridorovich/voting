@@ -1,8 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.database.session import get_db
-from app.modules.voting.services import get_active_polls, vote_in_poll, get_poll_details, close_poll
+from app.modules.voting.services import (
+    get_active_polls,
+    vote_in_poll,
+    get_poll_details,
+    close_poll
+)
 from app.modules.voting.services import create_poll
-from app.modules.voting.schemas import PollCreate, TokenParam, VoteCreate, ClosePollRequest
+from app.modules.voting.schemas import (
+    PollCreate,
+    TokenParam,
+    VoteCreate,
+    ClosePollRequest
+)
 from app.shared.security import get_current_user
 
 router = APIRouter(prefix="/polls", tags=["Polls"])

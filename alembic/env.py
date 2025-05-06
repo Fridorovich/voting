@@ -5,9 +5,9 @@ from sqlalchemy import pool
 
 from alembic import context
 from app.database.base import Base
-from app.modules.auth.models import *
-from app.modules.voting.models import *
-from app.modules.admin.models import *
+from app.modules.auth.models import * # noqa
+from app.modules.voting.models import * # noqa
+from app.modules.admin.models import * # noqa
 from app.config import settings
 
 config = context.config

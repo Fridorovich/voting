@@ -1,0 +1,7 @@
+[flake8]
+ignore = E203, W503, F405
+exclude =
+    .git,
+    __pycache__,
+    alembic/versions/*
+max-line-length = 88

@@ -1,6 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from app.database.session import get_db
-from app.modules.admin.schemas import UserCreate, PollCreate, PollUpdate, TokenParam
+from app.modules.admin.schemas import (
+    UserCreate,
+    PollCreate,
+    PollUpdate,
+    TokenParam
+)
 from app.modules.admin.services import (
     create_user,
     create_poll,
@@ -10,7 +15,7 @@ from app.modules.admin.services import (
     delete_user,
     get_all_choices,
 )
-from app.shared.security import get_current_admin  # Защита админских эндпоинтов
+from app.shared.security import get_current_admin
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
