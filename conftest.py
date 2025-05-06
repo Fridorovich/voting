@@ -10,7 +10,7 @@ from app.database.base import Base
 from app.database.session import get_db
 
 
-SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///./sqr_voting.db"
+SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///./test.db"
 
 
 @pytest.fixture(scope="module")
@@ -31,7 +31,7 @@ def db(db_engine):
     transaction = connection.begin()
     session = sessionmaker(bind=connection)()
 
-    yield session  # это и есть наш db
+    yield session
 
     session.close()
     transaction.rollback()
@@ -41,8 +41,8 @@ def db(db_engine):
 @pytest.fixture()
 def client(db: Session):
     def override_get_db():
-        yield db  # передаем тестовую сессию
-
+        yield db 
+        
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
