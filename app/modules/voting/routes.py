@@ -29,9 +29,10 @@ async def user_create_poll(
         poll_data: PollCreate,
         token_param: TokenParam = Depends(),
         db=Depends(get_db),
+        user: dict = Depends(get_current_user)
 ):
     """Пользователь создает новый опрос"""
-    return await create_poll(db, poll_data)
+    return await create_poll(db, poll_data, user["email"])
 
 
 @router.post("/{poll_id}/vote")

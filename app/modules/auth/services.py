@@ -14,7 +14,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def create_user(
         db: Session, email: str,
         password: str,
-        role: str = "admin"
+        role: str = "user"
 ):
     logger.info(f"Creating user: email={email}, role={role}")
     hashed_password = pwd_context.hash(password)

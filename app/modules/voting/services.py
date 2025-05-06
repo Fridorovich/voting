@@ -43,12 +43,21 @@ async def get_active_polls(db: Session):
     return result
 
 
-async def create_poll(db: Session, poll_data: PollCreate):
-    logger.info(f"Creating new poll: {poll_data.title}")
+async def create_poll(db: Session, poll_data: PollCreate, user_email: str):
+    """Создание опроса с корректным creator_id"""
+    logger.info(f"Creating new poll: {poll_data.title} by {user_email}")
+
+    # Находим пользователя по email
+    db_user = db.query(User).filter(User.email == user_email).first()
+    if not db_user:
+        logger.error(f"User with email {user_email} not found")
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Создаем новый опрос
     new_poll = Poll(
         title=poll_data.title,
         description=poll_data.description,
-        creator_id=1,
+        creator_id=db_user.id,  # Теперь это реальный ID пользователя
         is_multiple_choice=poll_data.is_multiple_choice,
         close_date=poll_data.close_date,
         is_closed=False,
@@ -59,16 +68,13 @@ async def create_poll(db: Session, poll_data: PollCreate):
     db.commit()
     db.refresh(new_poll)
 
-    if not new_poll.id:
-        logger.error("Poll creation failed: missing ID")
-        raise ValueError("Failed to create poll: poll ID is missing")
-
+    # Добавляем варианты ответов
     for choice_text in poll_data.choices:
         new_choice = Choice(text=choice_text, poll_id=new_poll.id)
         db.add(new_choice)
 
     db.commit()
-    logger.info(f"Poll created successfully: id={new_poll.id}")
+
     return {"id": new_poll.id, "title": new_poll.title, "choices": poll_data.choices}
 
 
@@ -176,18 +182,19 @@ async def close_poll(
             detail="Poll not found"
         )
 
-    if poll.is_closed:
-        logger.warning(f"Poll already closed: poll_id={poll_id}")
-        raise HTTPException(
-            status_code=400,
-            detail="Poll already closed"
-        )
-
+    print(poll.creator.email)
     if poll.creator.email != user_email:
         logger.warning(f"Unauthorized poll close attempt: poll_id={poll_id}")
         raise HTTPException(
             status_code=403,
             detail="Only the creator of the poll can close it"
+        )
+
+    if poll.is_closed:
+        logger.warning(f"Poll already closed: poll_id={poll_id}")
+        raise HTTPException(
+            status_code=400,
+            detail="Poll already closed"
         )
 
     if new_close_date:

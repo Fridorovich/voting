@@ -19,8 +19,9 @@ pydantic-settings = "^2.9.1"
 pyjwt = "^2.10.1"
 python-jose = {extras = ["cryptography"], version = "^3.4.0"}
 bcrypt = "^4.3.0"
-httpx = "^0.28.1"  # Using the higher version
-anyio = "^4.0.0"  # Added from second config
+httpx = "^0.28.1"
+anyio = "^4.0.0"
+streamlit = "^1.45.0"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.1.0"
@@ -29,7 +30,7 @@ pytest-cov = "^6.1.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.5"
-pytest-asyncio = "^0.26.0"  # Using the higher version
+pytest-asyncio = "^0.26.0"
 pytest-mock = "^3.14.0"
 freezegun = "^1.4.0"
 
