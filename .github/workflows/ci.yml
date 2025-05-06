@@ -9,6 +9,13 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_DAYS: 7
 
     steps:
     - uses: actions/checkout@v4
@@ -20,26 +27,33 @@ jobs:
 
     - name: Clean Poetry environments
       run: |
-        # Remove all possible Poetry-related files
         rm -rf ~/.poetry || true
         rm -rf ~/.cache/pypoetry || true
         rm -rf ~/.local/share/pypoetry || true
         rm -rf ~/.config/pypoetry || true
         rm -rf .venv || true
+        mkdir -p ~/.config/pypoetry
 
-    - name: Install Poetry (alternative method)
+    - name: Install Poetry
       run: |
-        curl -sSL https://install.python-poetry.org | python3 - --version 1.5.1
+        pip install poetry==1.5.1 --user
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Configure Poetry
       run: |
         poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true --local
 
     - name: Install dependencies
       run: |
         poetry install --no-interaction --no-ansi --with dev
+
+    - name: Set up PostgreSQL
+      uses: harmon758/postgresql-action@v1
+      with:
+        postgresql version: '14'
+        postgresql db: 'test_db'
+        postgresql user: 'postgres'
+        postgresql password: 'postgres'
 
     - name: Run tests with Poetry
       run: |
