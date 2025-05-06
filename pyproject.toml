@@ -5,6 +5,7 @@ description = "A voting system for creating surveys and votes"
 authors = ["Egor Nischikh <e.nischikh@innopolis.university>"]
 license = "MIT"
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -19,14 +20,19 @@ pydantic-settings = "^2.9.1"
 pyjwt = "^2.10.1"
 python-jose = {extras = ["cryptography"], version = "^3.4.0"}
 bcrypt = "^4.3.0"
-httpx = "^0.28.1"
+httpx = "^0.28.1"  # Using the higher version
+anyio = "^4.0.0"  # Added from second config
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.1.0"
-pytest = "^8.3.5"
-pytest-asyncio = "^0.26.0"
 bandit = "^1.8.3"
 pytest-cov = "^6.1.1"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.3.5"
+pytest-asyncio = "^0.26.0"  # Using the higher version
+pytest-mock = "^3.14.0"
+freezegun = "^1.4.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -35,6 +41,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
+testpaths = ["app/tests"]
+python_files = "test_*.py"
+addopts = "-v --color=yes"
 filterwarnings = [
     "ignore::DeprecationWarning:passlib.*:"
 ]
