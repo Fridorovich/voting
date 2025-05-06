@@ -1,5 +1,4 @@
 name: CI Pipeline
-
 on:
   push:
     branches: [ main ]
@@ -9,7 +8,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
     - uses: actions/checkout@v4
@@ -19,10 +18,20 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Clean Poetry cache
+      run: |
+        rm -rf ~/.cache/pypoetry || true
+        rm -rf ~/.local/share/pypoetry || true
+        rm -rf ~/.poetry || true
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
         version: 1.5.1
+
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.in-project true
 
     - name: Install dependencies
       run: |
