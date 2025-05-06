@@ -20,7 +20,8 @@ poetry.lock
 requirements.txt
 
 # Данные базы данных
-sqr_voting.db  # Если используете SQLite
+sqr_voting.db
+test.db
 *.sqlite3
 
 # Файлы Alembic миграций
