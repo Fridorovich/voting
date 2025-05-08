@@ -214,6 +214,9 @@ The logging system is implemented using Python's built-in `logging` module. The 
 * Implement additional security checks with Bandit for more comprehensive analysis.
 * Expand the frontend to provide a more interactive user experience.
 
+## Accessibility
+- **Public access**: [https://voting-inno.ru](https://voting-inno.ru)
+  
 ## References
 
 * [FastAPI Documentation](https://fastapi.tiangolo.com/)
