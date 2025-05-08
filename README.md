@@ -215,7 +215,7 @@ The logging system is implemented using Python's built-in `logging` module. The 
 * Expand the frontend to provide a more interactive user experience.
 
 ## Accessibility
-- **Public access**: [https://voting-inno.ru](https://voting-inno.ru)
+- **Public access**: [https://voting-inno.ru](https://voting-inno.ru) or [http://79.174.93.194:8501/](http://79.174.93.194:8501/)
   
 ## References
 
