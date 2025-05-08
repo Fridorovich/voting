@@ -151,6 +151,22 @@ The CI/CD pipeline is implemented using GitHub Actions. The pipeline includes th
   poetry install --with dev
   ```
   
+## Logging Implementation
+
+The logging system is implemented using Python's built-in `logging` module. The logging configuration is initialized in the `setup_logging()` function, located in the `app/shared/logging.py` file.
+
+### Logging Configuration:
+
+* **Log Directory:** Logs are stored in the `logs` directory. If the directory does not exist, it is automatically created.
+* **Log File:** The main log file is `sqr_voting_system.log`.
+* **Log Rotation:**
+
+  * Maximum file size: 10 MB
+  * Backup count: 5 log files are retained before the oldest logs are removed.
+* **Log Format:** The log format includes the timestamp, log level, module name, and the log message. Example:
+  `[2025-05-08 14:23:56] [INFO] [app.modules.auth.services] User authenticated: id=1`
+* **Log Levels:** The system logs events at the following levels: `INFO`, `WARNING`, `ERROR`, `CRITICAL`.
+
 ## Testing
 
 * The testing strategy includes unit testing, integration testing, and security testing.
