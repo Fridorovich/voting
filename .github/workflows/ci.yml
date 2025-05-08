@@ -59,9 +59,9 @@ jobs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-      
+
     - name: Set up Docker Compose
-      uses: docker/setup-compose-action@v2 
+      uses: docker/setup-compose-action@v2  
 
     - name: Login to Docker Hub
       if: github.ref == 'refs/heads/main'
@@ -80,14 +80,13 @@ jobs:
 
     - name: Build with Docker Compose
       run: |
-        docker-compose build
+        docker compose build  # Используйте 'docker compose' вместо 'docker-compose'
 
     - name: Start and verify containers
       run: |
-        docker-compose up -d
-        # Проверка статуса контейнеров
-        timeout 60 bash -c 'until [ "$(docker-compose ps --services --filter status=running | wc -l)" -eq "$(docker-compose ps --services | wc -l)" ]; do sleep 2; done'
-        docker-compose ps
+        docker compose up -d
+        timeout 60 bash -c 'until [ "$(docker compose ps --services --filter status=running | wc -l)" -eq "$(docker compose ps --services | wc -l)" ]; do sleep 2; done'
+        docker compose ps
 
     - name: Run integration tests
       run: |
@@ -96,9 +95,9 @@ jobs:
     - name: Stop containers
       if: always()
       run: |
-        docker-compose down -v --remove-orphans
+        docker compose down -v --remove-orphans  # Используйте 'docker compose'
 
     - name: Push Docker images
       if: github.ref == 'refs/heads/main'
       run: |
-        docker-compose push
+        docker compose push
