@@ -64,7 +64,14 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
+    - name: Create .env
+      run: |
+        echo "SECRET_KEY=${{ env.SECRET_KEY }}" >> .env
+        echo "DATABASE_URL=${{ env.DATABASE_URL }}" >> .env
+        echo "ALGORITHM=${{ env.ALGORITHM }}" >> .env
+        echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ env.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
+        echo "REFRESH_TOKEN_EXPIRE_DAYS=${{ env.REFRESH_TOKEN_EXPIRE_DAYS }}" >> .env
+    
     - name: Install Docker Compose
       run: |
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
