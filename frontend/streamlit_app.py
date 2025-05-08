@@ -319,7 +319,7 @@ def show_voting_form(poll: Dict, session_key: str):
 
 def show_results(poll: Dict, session_key: str):
     """Reflection of the result with unique keys"""
-    if (poll.get("is_closed") == False):
+    if (not poll.get("is_closed")):
         st.write("Your vote is accounted")
     else:
         results = poll.get("results", {})
