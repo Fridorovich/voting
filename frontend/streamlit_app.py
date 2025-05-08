@@ -9,10 +9,10 @@ import uuid
 from dotenv import load_dotenv
 
 load_dotenv()
-# Конфигурация
+# Configuration
 BASE_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
-# Инициализация состояния сессии
+# Session state initialization
 def init_session_state():
     session_keys = {
         'access_token': None,
@@ -28,9 +28,9 @@ def init_session_state():
 
 init_session_state()
 
-# Функции аутентификации
+# Authentification form
 def register_user(email: str, password: str):
-    """Регистрация нового пользователя"""
+    """New user register"""
     url = f"{BASE_URL}/auth/register"
     data = {"email": email, "password": password}
     try:
@@ -45,12 +45,12 @@ def register_user(email: str, password: str):
         return False
 
 def login_user(email: str, password: str):
-    """Аутентификация пользователя"""
+    """User authentification"""
     url = f"{BASE_URL}/auth/login"
     data = {"email": email, "password": password}
     try:
         response = requests.post(url, json=data)
-        response.raise_for_status()  # Генерирует исключение при 4xx/5xx статусах
+        response.raise_for_status()  # Exception generation
         tokens = response.json()
         st.session_state.update({
             'access_token': tokens['access_token'],
@@ -71,7 +71,7 @@ def login_user(email: str, password: str):
         return False
 
 def logout_user():
-    """Выход из системы"""
+    """Log out"""
     st.session_state.update({
         'access_token': None,
         'refresh_token': None,
@@ -83,7 +83,7 @@ def logout_user():
     st.success("Logged out successfully!")
 
 def refresh_access_token():
-    """Обновление access token"""
+    """Updating access token"""
     if not st.session_state.refresh_token:
         return False
     try:
@@ -101,9 +101,9 @@ def refresh_access_token():
         st.error(f"Token refresh error: {str(e)}")
         return False
 
-# Функции для работы с опросами
+# Functions for work with polls
 def get_all_polls():
-    """Получение всех опросов"""
+    """Getting all polls"""
     try:
         response = requests.get(f"{BASE_URL}/polls/")
         response.raise_for_status()
@@ -113,7 +113,7 @@ def get_all_polls():
         return []
 
 def refresh_polls():
-    """Обновление списка опросов"""
+    """Updating list of polls"""
     st.session_state.polls = get_all_polls()
 
 def create_new_poll(poll_data: Dict):
@@ -146,7 +146,7 @@ def create_new_poll(poll_data: Dict):
         st.error(f"Unexpected error: {str(e)}")
 
 def submit_vote(poll_id: int, choice_ids: List[int]):
-    """Отправка голоса"""
+    """Vote submission"""
     if not st.session_state.is_logged_in:
         st.warning("You must be logged in to vote.")
         return
@@ -175,7 +175,7 @@ def submit_vote(poll_id: int, choice_ids: List[int]):
         return False
 
 def close_poll(poll_id: int, new_close_date: str = None):
-    """Закрытие опроса"""
+    """Closing poll"""
     headers = {
         "Authorization": f"Bearer {st.session_state.access_token}",
         "Content-Type": "application/json"
@@ -198,7 +198,7 @@ def close_poll(poll_id: int, new_close_date: str = None):
         st.error(f"Error closing poll: {str(e)}")
 
 def auth_forms():
-    """Формы аутентификации"""
+    """Authentification form"""
     st.header("Authentication")
     tab1, tab2, tab3 = st.tabs(["Login", "Register", "View Polls"])
 
@@ -208,7 +208,7 @@ def auth_forms():
             email = st.text_input("Email")
             password = st.text_input("Password", type="password")
             if st.form_submit_button("Login"):
-                if login_user(email, password):  # rerun только при успехе
+                if login_user(email, password):  # rerun when success
                     st.rerun()
 
     with tab2:
@@ -227,7 +227,7 @@ def auth_forms():
 def get_all_polls_request():
     response = requests.get(f"{BASE_URL}/polls")
     if response.status_code != 200:
-        st.error("Ошибка загрузки опросов")
+        st.error("Error loading polls")
         return
     polls = response.json()
     return polls
@@ -235,17 +235,17 @@ def get_all_polls_request():
 def display_closed_polls():
     polls = get_all_polls()
     closed_polls = [p for p in polls if p['is_closed']]
-    st.write("### Завершенные опросы")
+    st.write("### Closed polls")
     for poll in closed_polls:
         render_poll(poll, is_active=False)
 
 def display_active_polls():
     polls = get_all_polls()
     
-    # Разделение опросов с гарантией уникальности
+    # Distribution of polls with success guarantee
     active_polls = [p for p in polls if not p['is_closed']]
-    # Уникальные ключи для вкладок
-    st.write("### Активные опросы")
+    # Unique keys for tabs
+    st.write("### Active polls")
     for poll in active_polls:
         render_poll(poll, is_active=True)
 
@@ -255,12 +255,12 @@ def show_voting_form(poll: Dict, session_key: str):
     response = requests.get(f"{BASE_URL}/polls/{poll_id}").json()
     choices = response['choices']
 
-    # Инициализация выбранных ID, если их нет в session_state
+    # ID initialization outside session state
     if f'selected_{poll_id}' not in st.session_state:
         st.session_state[f'selected_{poll_id}'] = []
     selected_ids = st.session_state[f'selected_{poll_id}']
 
-    # Отображение вариантов ответа
+    # Reflection all answers choices
     if response['is_multiple_choice']:
         for choice in choices:
             is_checked = choice['id'] in selected_ids
@@ -280,18 +280,18 @@ def show_voting_form(poll: Dict, session_key: str):
         new_ids = st.session_state[f'selected_{poll_id}']
     else:
         selected_id = selected_ids[0] if selected_ids else None
-        # Для radio тоже используем объекты словарей
+        # For radio only dict objects
         new_choice = st.radio(
-            "Выберите вариант:",
-            options=choices,  # <- Передаем сами объекты
-            format_func=lambda x: x['text'],  # <- Берем текст из словаря
+            "Choose the variant:",
+            options=choices,  # <-Give the objects
+            format_func=lambda x: x['text'],  # <- Take text from dict
             index=next((i for i, c in enumerate(choices) if c['id'] == selected_id), 0),
             key=f"radio_{poll_id}_{session_key}"
         )
-        new_ids = [new_choice['id']]  # Теперь работает
+        new_ids = [new_choice['id']]  
 
-    # Кнопка отправки голоса (остается без изменений)
-    if st.button("✅ Подтвердить", key=f"submit_{poll_id}_{session_key}"):
+    # Vote submit button
+    if st.button("✅ Accept", key=f"submit_{poll_id}_{session_key}"):
         if new_ids:
             success = submit_vote(poll_id, new_ids)
             if success:
@@ -303,7 +303,7 @@ def show_voting_form(poll: Dict, session_key: str):
             st.warning("Choose at least 1 variant")
 
 def show_results(poll: Dict, session_key: str):
-    """Отображение результатов с уникальными ключами"""
+    """Reflection of the result with unique keys"""
     if (poll.get("is_closed") == False):
         st.write("Your vote is accounted")
     else :
@@ -314,14 +314,14 @@ def show_results(poll: Dict, session_key: str):
             total += res
 
         if total == 0:
-            st.write("Голосов пока нет")
+            st.write("No votes yer")
             return
 
         for i, (option, votes) in enumerate(results.items()):
             percent = (votes / total) * 100
             st.progress(
                 percent / 100,
-                text=f"{option}: {votes} голосов ({percent:.1f}%)",
+                text=f"{option}: {votes} votes ({percent:.1f}%)",
                 # key=f"progress_{poll_id}_{session_key}_{i}"
             )
 
@@ -329,21 +329,21 @@ def render_poll(poll: Dict, is_active: bool):
     poll_id = poll['id']
     container = st.container()
 
-    # Инициализация уникального ключа сессии для опроса
+    # Initialization of unique key
     if f'poll_session_{poll_id}' not in st.session_state:
         st.session_state[f'poll_session_{poll_id}'] = str(uuid.uuid4())
 
     session_key = st.session_state[f'poll_session_{poll_id}']
 
     with container:
-        # Заголовок опроса с уникальным ключом
+        # Header with unique key
         st.write(f"**{poll['title']}**")
         st.write(f"{poll['description']}")
-        # Состояние для выбранных вариантов
+        # State for chosen variants
         if f'selected_{poll_id}' not in st.session_state:
             st.session_state[f'selected_{poll_id}'] = []
 
-        # Форма голосования или результаты
+        # Vote form and results
         if is_active and not st.session_state.user_votes.get(poll_id, False):
             show_voting_form(poll, session_key)
         else:
@@ -361,13 +361,13 @@ def handle_close_poll(poll_id: int):
             headers={"Authorization": f"Bearer {st.session_state.access_token}"}
         )
         if response.status_code == 200:
-            st.success("Опрос закрыт!")
+            st.success("Poll is closed")
             st.rerun()
     except Exception as e:
-        st.error(f"Ошибка: {str(e)}")
+        st.error(f"Error: {str(e)}")
 
 def create_poll_form():
-    """Форма создания опроса"""
+    """Creating poll form"""
     if not st.session_state.is_logged_in:
         st.warning("You must be logged in to create a poll.")
         return
@@ -394,7 +394,7 @@ def create_poll_form():
             }
             create_new_poll(poll_data)
 
-# Главный интерфейс
+# Main interface
 st.title("Polling System")
 
 if not st.session_state.is_logged_in:
@@ -402,7 +402,7 @@ if not st.session_state.is_logged_in:
 else:
     st.header(f"Welcome, {st.session_state.user_email}!")
 
-    # Навигация
+    # Navigation
     tab1, tab2, tab3 = st.tabs(["Active Polls", "Closed Polls", "Create Poll"])
 
     with tab1:
@@ -414,7 +414,7 @@ else:
     with tab3:
         create_poll_form()
 
-    # Кнопка выхода
+    # Logout button
     if st.button("Logout"):
         logout_user()
         st.rerun()
