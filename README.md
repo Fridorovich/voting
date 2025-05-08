@@ -6,7 +6,7 @@ The SQR Voting System is a web-based platform designed for creating, managing, a
 
 ## Team Members
 
-* **Egor Nisckih** - Team Leader, Backend Developer
+* **Egor Nisckikh** - Team Leader, Backend Developer
 * **Almaz Gayazov** - Backend Developer, Tester
 * **Renata Latypova** - Backend Developer, Tester
 * **Artemij Volkonitin** - Tester
@@ -93,9 +93,9 @@ The SQR Voting System is a web-based platform designed for creating, managing, a
 * Poll result viewing with real-time updates.
 * Robust error handling and logging for all actions.
 
-## Continuous Integration (CI/CD)
+## Continuous Integration (CI)
 
-The CI/CD pipeline is implemented using GitHub Actions. The pipeline includes the following stages:
+The CI pipeline is implemented using GitHub Actions. The pipeline includes the following stages:
 
 * **Setup:** The environment is configured to use Python 3.11.
 * **Dependency Installation:** Poetry is installed and dependencies are managed in an isolated environment.
@@ -205,7 +205,7 @@ The logging system is implemented using Python's built-in `logging` module. The 
 ## Lessons Learned
 
 * Implementing structured testing and coverage analysis significantly reduces potential bugs.
-* Automated CI/CD pipelines streamline deployment and testing.
+* Automated CI pipelines streamline deployment and testing.
 * Comprehensive Dockerization ensures consistency across environments.
 
 ## Future Improvements
