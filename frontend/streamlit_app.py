@@ -6,6 +6,9 @@ from typing import List, Dict
 import json
 import time
 import uuid
+from dotenv import load_dotenv
+
+load_dotenv()
 # Конфигурация
 BASE_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
@@ -171,26 +174,28 @@ def submit_vote(poll_id: int, choice_ids: List[int]):
         st.error(f"Error submitting vote: {str(e)}")
         return False
 
-# def close_poll(poll_id: int, new_close_date: str = None):
-#     """Закрытие опроса"""
-#     headers = {
-#         "Authorization": f"Bearer {st.session_state.access_token}",
-#         "Content-Type": "application/json"
-#     }
-#     close_data = {"new_close_date": new_close_date} if new_close_date else {}
-#     try:
-#         response = requests.post(
-#             f"{BASE_URL}/polls/{poll_id}/close",
-#             json=close_data,
-#             headers=headers
-#         )
-#         if response.status_code == 200:
-#             st.success("Poll closed successfully!")
-#             refresh_polls()
-#         else:
-#             st.error(f"Failed to close poll: {response.json().get('detail', 'Unknown error')}")
-#     except Exception as e:
-#         st.error(f"Error closing poll: {str(e)}")
+def close_poll(poll_id: int, new_close_date: str = None):
+    """Закрытие опроса"""
+    headers = {
+        "Authorization": f"Bearer {st.session_state.access_token}",
+        "Content-Type": "application/json"
+    }
+    close_data = {"new_close_date": new_close_date} if new_close_date else {}
+    params = {"token": st.session_state.access_token, "poll_id" : poll_id}
+    try:
+        response = requests.post(
+            f"{BASE_URL}/polls/{poll_id}/close",
+            json=close_data,
+            headers=headers,
+            params=params
+        )
+        if response.status_code == 200:
+            st.success("Poll closed successfully!")
+            st.rerun()
+        else:
+            st.error(f"Failed to close poll: {response.json().get('detail', 'Unknown error')}")
+    except Exception as e:
+        st.error(f"Error closing poll: {str(e)}")
 
 def auth_forms():
     """Формы аутентификации"""
@@ -289,7 +294,6 @@ def show_voting_form(poll: Dict, session_key: str):
     if st.button("✅ Подтвердить", key=f"submit_{poll_id}_{session_key}"):
         if new_ids:
             success = submit_vote(poll_id, new_ids)
-            st.write(success)
             if success:
                 st.session_state.user_votes[poll_id] = True
                 st.session_state[f'poll_session_{poll_id}'] = str(uuid.uuid4())
@@ -334,7 +338,7 @@ def render_poll(poll: Dict, is_active: bool):
     with container:
         # Заголовок опроса с уникальным ключом
         st.write(f"**{poll['title']}**")
-
+        st.write(f"{poll['description']}")
         # Состояние для выбранных вариантов
         if f'selected_{poll_id}' not in st.session_state:
             st.session_state[f'selected_{poll_id}'] = []
@@ -344,6 +348,10 @@ def render_poll(poll: Dict, is_active: bool):
             show_voting_form(poll, session_key)
         else:
             show_results(poll, session_key)
+    
+    if is_active and st.session_state.is_logged_in:
+            if st.button(f"Close Poll", key=f"close_poll_{poll_id}"):
+                close_poll(poll_id)
 
 
 def handle_close_poll(poll_id: int):
@@ -354,7 +362,7 @@ def handle_close_poll(poll_id: int):
         )
         if response.status_code == 200:
             st.success("Опрос закрыт!")
-            refresh_polls()
+            st.rerun()
     except Exception as e:
         st.error(f"Ошибка: {str(e)}")
 
