@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # Configuration
-BASE_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+BASE_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
 
 # Session state initialization
 def init_session_state():
@@ -314,7 +314,7 @@ def show_results(poll: Dict, session_key: str):
             total += res
 
         if total == 0:
-            st.write("No votes yer")
+            st.write("No votes yet")
             return
 
         for i, (option, votes) in enumerate(results.items()):
