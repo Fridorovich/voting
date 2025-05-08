@@ -161,7 +161,6 @@ The CI/CD pipeline is implemented using GitHub Actions. The pipeline includes th
   * User login (`/auth/login`), validating both correct and incorrect credentials.
   * Refreshing tokens (`/auth/token/refresh`), including invalid token scenarios.
   * Logout functionality (`/auth/logout`).
-* Coverage for the `auth` module is **100%**, as seen in the detailed report.
 
 ## Test Coverage Analysis
 
@@ -173,25 +172,14 @@ The CI/CD pipeline is implemented using GitHub Actions. The pipeline includes th
   * `app/modules/voting/routes.py`: 67%
   * `app/modules/voting/services.py`: 70%
   * `app/modules/admin/routes.py`: 54%
+  * `app/modules/admin/routes.py`: 98%
 
-Detailed coverage reports are generated as HTML and can be accessed in the `htmlcov/` directory.
- 
-### Quality Requirements
-
-* **Code Coverage:** 89% (exceeding the minimum requirement of 80%)
-* **Maintainability Index:** 82
-* **Compliance with PEP8:** 97%
-* **Recovery Time (MTTR):** ≤ 15 minutes after critical failure
-* **Performance:**
-
-  * Poll creation: ≤ 500 ms
-  * Voting: ≤ 300 ms
-  * Result retrieval: ≤ 1 second
-* **Security:**
+## Security
 
   * Passwords are hashed using JWT and bcrypt.
   * Protection against SQL Injection and XSS.
   * All actions are logged for accountability.
+    
 ## Lessons Learned
 
 * Implementing structured testing and coverage analysis significantly reduces potential bugs.
