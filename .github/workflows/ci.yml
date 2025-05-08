@@ -1,9 +1,9 @@
 name: CI Pipeline
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -16,6 +16,8 @@ jobs:
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
       REFRESH_TOKEN_EXPIRE_DAYS: 7
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
 
     steps:
     - uses: actions/checkout@v4
@@ -32,7 +34,6 @@ jobs:
         rm -rf ~/.local/share/pypoetry || true
         rm -rf ~/.config/pypoetry || true
         rm -rf .venv || true
-        mkdir -p ~/.config/pypoetry
 
     - name: Install Poetry
       run: |
@@ -47,13 +48,14 @@ jobs:
       run: |
         poetry install --no-interaction --no-ansi --with dev
 
-    - name: Run tests with Poetry
+    - name: Run unit tests
       run: |
         poetry run pytest app/tests -v
 
-    - name: Check PEP-8 style with flake8
+    - name: Check PEP-8 style
       run: |
         poetry run flake8 app/ --count --show-source --statistics --max-line-length=88
+        poetry run flake8 frontend/streamlit_app.py --count --show-source --statistics --max-line-length=88
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -64,25 +66,36 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
     - name: Create .env
       run: |
-        echo "SECRET_KEY=${{ env.SECRET_KEY }}" >> .env
-        echo "DATABASE_URL=${{ env.DATABASE_URL }}" >> .env
-        echo "ALGORITHM=${{ env.ALGORITHM }}" >> .env
-        echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ env.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
-        echo "REFRESH_TOKEN_EXPIRE_DAYS=${{ env.REFRESH_TOKEN_EXPIRE_DAYS }}" >> .env
-    
-    - name: Install Docker Compose
-      run: |
-        sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
+        echo "SECRET_KEY=$SECRET_KEY" > .env
+        echo "DATABASE_URL=$DATABASE_URL" >> .env
+        echo "ALGORITHM=$ALGORITHM" >> .env
+        echo "ACCESS_TOKEN_EXPIRE_MINUTES=$ACCESS_TOKEN_EXPIRE_MINUTES" >> .env
+        echo "REFRESH_TOKEN_EXPIRE_DAYS=$REFRESH_TOKEN_EXPIRE_DAYS" >> .env
 
-    - name: Build with Compose
+    - name: Build with Docker Compose
       run: |
-        docker-compose -f docker-compose.yml build
+        docker-compose build
 
-    - name: Push images
+    - name: Start and verify containers
+      run: |
+        docker-compose up -d
+        # Проверка статуса контейнеров
+        timeout 60 bash -c 'until [ "$(docker-compose ps --services --filter status=running | wc -l)" -eq "$(docker-compose ps --services | wc -l)" ]; do sleep 2; done'
+        docker-compose ps
+
+    - name: Run integration tests
+      run: |
+        poetry run pytest app/integration_tests -v
+
+    - name: Stop containers
+      if: always()
+      run: |
+        docker-compose down -v --remove-orphans
+
+    - name: Push Docker images
       if: github.ref == 'refs/heads/main'
       run: |
-        echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
-        docker-compose -f docker-compose.yml push
+        docker-compose push
