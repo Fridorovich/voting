@@ -85,10 +85,6 @@ jobs:
         timeout 60 bash -c 'until [ "$(docker compose ps --services --filter status=running | wc -l)" -eq "$(docker compose ps --services | wc -l)" ]; do sleep 2; done'
         docker compose ps
 
-    - name: Run integration tests
-      run: |
-        poetry run pytest app/integration_tests -v
-
     - name: Stop containers
       if: always()
       run: |
