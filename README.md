@@ -6,7 +6,7 @@ The SQR Voting System is a web-based platform designed for creating, managing, a
 
 ## Team Members
 
-* **Egor Hiskich** - Team Leader, Backend Developer
+* \*\*Egor **Hisckih\*\*** - Team Leader, Backend Developer
 * **Almaz Gayazov** - Backend Developer, Tester
 * **Renata Latypova** - Backend Developer, Tester
 * **Artemij Volkonitin** - Tester
@@ -71,8 +71,10 @@ The SQR Voting System is a web-based platform designed for creating, managing, a
 * **Alembic** - Database migrations
 * **JWT** - Authentication
 * **Pytest** - Testing framework
+* **Coverage.py** - Test coverage analysis
 * **Flake8, Bandit** - Code quality and security analysis
 * **Streamlit** - Frontend
+* **Docker, Docker Compose** - Containerization and orchestration
 
 ## Implementation Details
 
@@ -91,6 +93,89 @@ The SQR Voting System is a web-based platform designed for creating, managing, a
 * Poll result viewing with real-time updates.
 * Robust error handling and logging for all actions.
 
+## Continuous Integration (CI/CD)
+
+The CI/CD pipeline is implemented using GitHub Actions. The pipeline includes the following stages:
+
+* **Setup:** The environment is configured to use Python 3.11.
+* **Dependency Installation:** Poetry is installed and dependencies are managed in an isolated environment.
+* **Code Quality Analysis:**
+
+  * `flake8` is run to check code style compliance with PEP8.
+  * `bandit` is used for security analysis to identify potential vulnerabilities.
+* **Testing:**
+
+  * All tests are executed using `pytest` with detailed output enabled.
+  * Test coverage is assessed with `coverage.py`. The coverage report is generated in HTML format and currently shows **89%** coverage.
+* **Dockerization:**
+
+  * If the branch is `main`, the Docker image is built and pushed to Docker Hub using `docker/build-push-action`.
+
+## Docker Containerization
+
+* The application is containerized using Docker and orchestrated with Docker Compose.
+* The `backend` service is built from the Dockerfile and exposed on port **8000**.
+* The application applies database migrations on startup using Alembic.
+* Data persistence is handled through volume mounts for the SQLite database.
+
+### Docker Commands:
+
+* Build the image:
+
+  ```bash
+  docker-compose build
+  ```
+
+* Run the container:
+
+  ```bash
+  docker-compose up
+  ```
+
+* Stop the container:
+
+  ```bash
+  docker-compose down
+  ```
+
+## Poetry Configuration
+
+* The project is managed using Poetry, a robust tool for dependency management and packaging.
+* The `pyproject.toml` file defines dependencies in two groups:
+
+  * `main`: Production dependencies such as `fastapi`, `sqlalchemy`, `uvicorn`.
+  * `dev`: Development tools like `flake8`, `bandit`, `pytest-cov`.
+* To install dependencies:
+
+  ```bash
+  poetry install --with dev
+  ```
+  
+## Testing
+
+* The testing strategy includes unit testing, integration testing, and security testing.
+* All tests are located in the `app/tests/` directory and are structured by module (e.g., `auth`, `voting`).
+* The `auth` module has been extensively tested with the following key tests:
+
+  * Registration of a new user (`/auth/register`), including checks for existing users.
+  * User login (`/auth/login`), validating both correct and incorrect credentials.
+  * Refreshing tokens (`/auth/token/refresh`), including invalid token scenarios.
+  * Logout functionality (`/auth/logout`).
+* Coverage for the `auth` module is **100%**, as seen in the detailed report.
+
+## Test Coverage Analysis
+
+* Total test coverage: **89%**
+* Key coverage results:
+
+  * `app/modules/auth/routes.py`: 100%
+  * `app/modules/auth/services.py`: 100%
+  * `app/modules/voting/routes.py`: 67%
+  * `app/modules/voting/services.py`: 70%
+  * `app/modules/admin/routes.py`: 54%
+
+Detailed coverage reports are generated as HTML and can be accessed in the `htmlcov/` directory.
+ 
 ### Quality Requirements
 
 * **Code Coverage:** 89% (exceeding the minimum requirement of 80%)
@@ -107,29 +192,24 @@ The SQR Voting System is a web-based platform designed for creating, managing, a
   * Passwords are hashed using JWT and bcrypt.
   * Protection against SQL Injection and XSS.
   * All actions are logged for accountability.
-
-## Testing
-
-* **Test Coverage:** 89%
-* **Unit Testing:** Pytest
-* **Static Analysis:** Flake8, Bandit
-* **Performance Testing:** Locust
-* **Integration Testing:** Testing of all key API endpoints and services
-
 ## Lessons Learned
 
-* Streamlining the development workflow using CI/CD pipelines.
-* Implementing effective test coverage to ensure code reliability.
-* Identifying and mitigating security vulnerabilities through automated scans.
+* Implementing structured testing and coverage analysis significantly reduces potential bugs.
+* Automated CI/CD pipelines streamline deployment and testing.
+* Comprehensive Dockerization ensures consistency across environments.
 
 ## Future Improvements
 
-* Implementing additional voting analytics.
-* Adding email notifications for poll creators and voters.
-* Enhancing the frontend with more interactive components.
+* Increase test coverage for the `voting` and `admin` modules to align with the 100% goal achieved in the `auth` module.
+* Implement additional security checks with Bandit for more comprehensive analysis.
+* Expand the frontend to provide a more interactive user experience.
 
 ## References
 
 * [FastAPI Documentation](https://fastapi.tiangolo.com/)
-* [Pytest Documentation](https://docs.pytest.org/)
-* [SQLite Documentation](https://sqlite.org/docs.html)
+* [Poetry Documentation](https://python-poetry.org/docs/)
+* [pytest Documentation](https://docs.pytest.org/)
+* [Docker Documentation](https://docs.docker.com/)
+* [GitHub Actions](https://docs.github.com/en/actions)
+* [Coverage.py](https://coverage.readthedocs.io/)
+* [Bandit](https://bandit.readthedocs.io/en/latest/)
