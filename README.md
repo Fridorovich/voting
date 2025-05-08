@@ -6,7 +6,7 @@ The SQR Voting System is a web-based platform designed for creating, managing, a
 
 ## Team Members
 
-* \*\*Egor **Hisckih\*\*** - Team Leader, Backend Developer
+* **Egor Nisckih** - Team Leader, Backend Developer
 * **Almaz Gayazov** - Backend Developer, Tester
 * **Renata Latypova** - Backend Developer, Tester
 * **Artemij Volkonitin** - Tester
@@ -155,12 +155,6 @@ The CI/CD pipeline is implemented using GitHub Actions. The pipeline includes th
 
 * The testing strategy includes unit testing, integration testing, and security testing.
 * All tests are located in the `app/tests/` directory and are structured by module (e.g., `auth`, `voting`).
-* The `auth` module has been extensively tested with the following key tests:
-
-  * Registration of a new user (`/auth/register`), including checks for existing users.
-  * User login (`/auth/login`), validating both correct and incorrect credentials.
-  * Refreshing tokens (`/auth/token/refresh`), including invalid token scenarios.
-  * Logout functionality (`/auth/logout`).
 
 ## Test Coverage Analysis
 
