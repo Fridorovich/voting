@@ -360,7 +360,7 @@ def render_poll(poll: Dict, is_active: bool):
             show_results(poll, session_key)
 
     if is_active and st.session_state.is_logged_in:
-        if st.button(f"Close Poll", key=f"close_poll_{poll_id}"):
+        if st.button("Close Poll", key=f"close_poll_{poll_id}"):
             close_poll(poll_id)
 
 
