@@ -65,11 +65,17 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: ${{ github.ref == 'refs/heads/main' }}
-        tags: |
-          ${{ secrets.DOCKER_HUB_USERNAME }}/sqr-voting-system:latest
-          ${{ secrets.DOCKER_HUB_USERNAME }}/sqr-voting-system:${{ github.sha }}
+    - name: Install Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+
+    - name: Build with Compose
+      run: |
+        docker-compose -f docker-compose.yml build
+
+    - name: Push images
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+        docker-compose -f docker-compose.yml push
