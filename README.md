@@ -184,6 +184,18 @@ The logging system is implemented using Python's built-in `logging` module. The 
   * `app/modules/admin/routes.py`: 54%
   * `app/modules/admin/routes.py`: 98%
 
+## Performance and Reliability Analysis
+
+* **Maintainability Index:** A (calculated using `radon mi`). All files in the project received a rating of `A`, indicating a high level of maintainability.
+
+* **Recovery Time (MTTR):** 0.296 seconds (measured using docker-compose up -d), significantly below the target of 15 minutes.
+  
+* **Performance Analysis:**
+
+  * **Poll creation:** Average response time - **2 ms**, Min - **1 ms**, Max - **4 ms** (target ≤ 500 ms)
+  * **Voting:** Average response time - **2 ms**, Min - **0 ms**, Max - **4 ms** (target ≤ 300 ms)
+  * **Result retrieval:** Average response time - **2 ms**, Min - **0 ms**, Max - **9 ms** (target ≤ 1 second)
+  
 ## Security
 
   * Passwords are hashed using JWT and bcrypt.
